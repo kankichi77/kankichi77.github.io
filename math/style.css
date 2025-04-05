@@ -1,0 +1,171 @@
+@media print {
+    .page {
+        page-break-after: always;
+    }
+}
+
+.sq {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.sq-title-link {
+    text-decoration: none;
+    color: #000;
+}
+.sq-title-link:hover {
+    text-decoration: none;
+}
+.sq-title-link:visited {
+    color: #000;
+}
+.sq-title {
+    font-size: 2em;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.sq-message {
+    font-size: 1.5em;
+    font-weight: bold;
+    height: 30px;
+}
+
+.sq-message-correct {
+    color: #00ff00;
+}
+.sq-message-incorrect {
+    color: #ff0000;
+}
+
+.sq-question {
+    display: flex;
+    flex-direction: row;
+    font-size: 3em;
+}
+
+.sq-operand, .sq-operator {
+    padding: 0px 10px;
+}
+.sq-input-answer {
+    padding: 0px 10px;
+}
+
+
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+.page {
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+    padding: 0px;
+    border: 0px solid #000;
+    background-color: #fff;
+}
+
+
+
+.header {
+    display: flex;
+    flex-direction: row;
+    justify-content:space-between;
+    margin-bottom: 10px;
+}
+
+.title h1 {
+    font-size: 24px;
+    color: #333;
+    text-decoration: none;
+}
+
+.title-link:hover {
+    text-decoration: none;
+}
+.title-link:visited {
+    color: #000;
+}
+
+.upperrightbox {
+    display: flex;
+    flex-direction: column;
+    border-spacing: 10px;
+}
+
+.upperrightbox .date_and_number {
+    display: flex;
+    flex-direction: row;
+}
+.upperrightbox .date {
+    width: 100%;
+    height: 40px;
+    border-bottom: 1px solid #000;
+    text-align: left;
+    display: flex;
+    align-items: flex-end;
+}
+
+.upperrightbox .number {
+    width: 50px;
+    border-bottom: 1px solid #000;
+    text-align: left;
+    display: flex;
+    align-items: flex-end;
+}
+
+.upperrightbox .name {
+    width: 250px;
+    height: 40px;
+    border-bottom: 1px solid #000;
+    text-align: left;
+    display: flex;
+    align-items: flex-end;
+}
+
+.main {
+    border-collapse: collapse;
+    margin-top: 30px;
+}
+
+.main td {
+    border: 0px solid #000;
+}
+
+.question {
+    width: 50px;
+    border: 0px solid #000;
+    font-size: 2em;
+    margin: 10px 25px;
+    padding: 0px;
+}
+
+.question-row {
+    height: 45px;
+}
+
+.operands {
+    padding: 0px 5px;
+    text-align: right;
+}
+
+.operator {
+    font-weight: bold;
+}
+
+.result-row {
+    border-top: 1px solid #000;
+}
+
+.result {
+    color: green;
+}
