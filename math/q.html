@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="jp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link href="css/style.css" rel="stylesheet">
+    <title>Papa's さんすうドリル</title>
+<script>
+    const MAX_OPERATORS = ['+', '-', 'X'];
+    const MAX_OPERAND1_ADD = 100;
+    const MAX_OPERAND2_ADD = 20;
+    const MAX_OPERAND1_SUB = 100;
+    const MAX_OPERAND2_SUB = 10;
+    const MAX_OPERAND1_MUL = 10;
+    const MAX_OPERAND2_MUL = 10;
+    const MAX_OPERAND1_DIV = 81;
+    const MAX_OPERAND2_DIV = 10;
+
+    function getRandomInteger(min, max) {
+        // min and max inclusive
+        if (min > max) {
+            throw new Error("Min should be less than or equal to Max");
+        }
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    function showMessage(message) {
+        document.getElementById('message').textContent = message;
+    }
+    function clearMessage() {
+        document.getElementById('message').classList.remove('sq-message-incorrect');
+        document.getElementById('message').classList.remove('sq-message-correct');
+        showMessage('');
+    }
+    function clearAnswer() {
+        document.getElementById('answer').value = '';
+        document.getElementById('answer').focus();
+    }
+    function setQuestion() {
+        const operators = MAX_OPERATORS;
+        const operator = operators[getRandomInteger(0, operators.length - 1)];
+        let operand1, operand2;
+        if (operator === '+') {
+            operand1 = getRandomInteger(1, MAX_OPERAND1_ADD);
+            operand2 = getRandomInteger(1, MAX_OPERAND2_ADD);
+        } else if (operator === 'X') {
+            operand1 = getRandomInteger(1, MAX_OPERAND1_MUL);
+            operand2 = getRandomInteger(1, MAX_OPERAND2_MUL);
+        } else if (operator === '-') {
+            operand1 = getRandomInteger(1, MAX_OPERAND1_SUB);
+            // Ensure operand1 is greater than operand2 for subtraction
+            if (operand1 === 1) {
+                operand2 = 1; // Special case to avoid negative numbers
+            } else {
+                operand2 = getRandomInteger(1, Math.min(MAX_OPERAND2_SUB, operand1 - 1));
+            }
+        } else {
+            operand2 = getRandomInteger(1, 10);
+        }
+        console.log('New question generated');
+        console.log(`Operand1: ${operand1}, Operator: ${operator}, Operand2: ${operand2}`);
+
+        document.getElementById('operand1').textContent = operand1;
+        document.getElementById('operator').textContent = operator;
+        document.getElementById('operand2').textContent = operand2;
+        document.getElementById('answer').focus();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setQuestion();
+        const answerInput = document.getElementById('answer');
+        // Add event listener for answer validation
+
+        answerInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                console.log('Enter key pressed');
+                validateAnswer();
+            }
+        });
+
+        const form = document.querySelector('.sq-input-answer form');
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            console.log('Form submitted');
+            validateAnswer();
+        });
+        const validateAnswer = () => {
+            const userAnswer = parseFloat(answerInput.value);
+            if (isNaN(userAnswer)) {
+                console.log('Empty response or invalid number!');
+                clearMessage();
+                return;
+            }
+            let correctAnswer;
+            const selectedOperator = document.getElementById('operator').textContent;
+            const num1 = parseFloat(document.getElementById('operand1').textContent);
+            const num2 = parseFloat(document.getElementById('operand2').textContent);
+            switch (selectedOperator) {
+                case '+':
+                    correctAnswer = num1 + num2;
+                    break;
+                case '-':
+                    correctAnswer = num1 - num2;
+                    break;
+                case 'X':
+                    correctAnswer = num1 * num2;
+                    break;
+                case '/':
+                    correctAnswer = num1 / num2;
+                    break;
+            }
+            console.log(`User Answer: ${userAnswer}, Correct Answer: ${correctAnswer}`);
+            if (userAnswer === correctAnswer) {
+                console.log('Correct answer!');
+                document.getElementById('message').classList.remove('sq-message-incorrect');
+                document.getElementById('message').classList.add('sq-message-correct');
+                showMessage('Correct!');
+                setQuestion();
+            } else {
+                console.log('Incorrect answer!');
+                document.getElementById('message').classList.remove('sq-message-correct');
+                document.getElementById('message').classList.add('sq-message-incorrect');
+                showMessage('Oops! Try again.');
+            }
+            clearAnswer();
+        };
+    });
+</script>
+</head>
+
+<body>
+  <main class="container">
+    <div class="sq">
+        <a href="{% url 'math_app:question' %}" class="sq-title-link">
+            <h1 class="sq-title">{{ site_title }}</h1>
+        </a>
+        <div id="message" class="sq-message"></div>
+        <div class="sq-question">
+            <div id="operand1" class="sq-operand"></div>
+            <div id="operator" class="sq-operator"></div>
+            <div id="operand2" class="sq-operand"></div>
+            <div id="equalsign" class="sq-operator">=</div>
+            <div class="sq-input-answer">
+                <form>
+                    <fieldset role="group">
+                        <input type="text" id="answer" placeholder="" size="3" autofocus inputmode="numeric">
+                        <input type="submit" value="Go" class="sq-submit" />
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+
+</html>
