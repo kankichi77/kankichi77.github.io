@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Papa's さんすうドリル</title>
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+
+<div id="pages-container"></div>
+
+<script>
+// ==============================================
+// Settings
+// ==============================================
+const SETTINGS = {
+  SITE_TITLE: "Papa's さんすうドリル",
+  NUM_PAGES: 1,
+  NUM_ROWS: 5,
+  NUM_QUESTIONS_PER_ROW: 5,
+  Q1_MIN: 10,
+  Q1_MAX: 99,
+  Q2_MIN: 2,
+  Q2_MAX: 9,
+  OPERATOR_ADD: true,
+  OPERATOR_SUB: false,
+  OPERATOR_MUL: false,
+  OPERATOR_DIV: false,
+};
+
+function getRandomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getAvailableOperators() {
+  const ops = [];
+  if (SETTINGS.OPERATOR_ADD) ops.push('+');
+  if (SETTINGS.OPERATOR_SUB) ops.push('-');
+  if (SETTINGS.OPERATOR_MUL) ops.push('x');
+  if (SETTINGS.OPERATOR_DIV) ops.push('/');
+  return ops;
+}
+
+function generateQuestion() {
+  const ops = getAvailableOperators();
+  const operator = ops[Math.floor(Math.random() * ops.length)];
+
+  const operand1 = getRandomNumber(SETTINGS.Q1_MIN, SETTINGS.Q1_MAX);
+  const operand2 = getRandomNumber(SETTINGS.Q2_MIN, SETTINGS.Q2_MAX);
+
+  return {
+    operand1: operand1,
+    operator: operator,
+    operand2: operand2,
+    result: ''
+  };
+}
+
+function makeAllQuestionRows() {
+  const rows = [];
+  for (let i = 0; i < SETTINGS.NUM_ROWS; i++) {
+    const row = [];
+    for (let j = 0; j < SETTINGS.NUM_QUESTIONS_PER_ROW; j++) {
+      row.push(generateQuestion());
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+
+// ==============================================
+// Build pages
+// ==============================================
+function buildPages() {
+  const container = document.getElementById('pages-container');
+  container.innerHTML = '';
+
+  for (let p = 0; p < SETTINGS.NUM_PAGES; p++) {
+    const rowsData = makeAllQuestionRows();   // one page worth of data
+
+    let pageHTML = `
+      <div class="page">
+        <div class="header">
+          <div class="title">
+            <a href="#">
+              <h1>${SETTINGS.SITE_TITLE}</h1>
+            </a>
+          </div>
+          <div class="upperrightbox">
+            <div class="date_and_number">
+              <div class="date">Date:</div>
+              <div class="number">No.</div>
+            </div>
+            <div class="name" colspan="2">Name:</div>
+          </div>
+        </div>
+        <table class="main">
+    `;
+
+    // generate the question tables
+    rowsData.forEach(row => {
+      pageHTML += '<tr>';
+      row.forEach(q => {
+        pageHTML += `
+          <td>
+            <table class="question">
+              <tr class="question-row">
+                <td></td>
+                <td class="operands operand1">${q.operand1}</td>
+              </tr>
+              <tr class="question-row">
+                <td class="operator">${q.operator}</td>
+                <td class="operands operand2">${q.operand2}</td>
+              </tr>
+              <tr class="question-row result-row">
+                <td></td>
+                <td class="result">${q.result}</td>
+              </tr>
+            </table>
+          </td>
+        `;
+      });
+      pageHTML += '</tr>';
+    });
+
+    pageHTML += '</table></div>';
+    container.innerHTML += pageHTML;
+  }
+}
+
+// Run when the page loads
+window.addEventListener('load', buildPages);
+</script>
+
+</body>
+</html>
