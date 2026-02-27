@@ -169,3 +169,139 @@ table {
 .result {
     color: green;
 }
+
+/* New: Controls (for the "Customize Worksheet" button) */
+.controls {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+button {
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+}
+
+button:hover {
+  background: #0055aa;
+}
+
+/* New: Dialog / modal styling */
+dialog {
+  border: none;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 480px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  background: white;
+}
+
+dialog::backdrop {
+  background: rgba(0,0,0,0.5);
+}
+
+form {
+  display: grid;
+  gap: 1.2rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 500;
+}
+
+input[type="number"] {
+  width: 100%;
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.operator-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+}
+
+.error {
+  color: #d32f2f;
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+  display: none;
+}
+
+.dialog-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.dialog-buttons button {
+  padding: 10px 20px;
+}
+
+.dialog-buttons button[type="button"] {
+  background: #666;
+}
+
+/* Optional: make dialog title look nice (if you don't already have h2 styling) */
+dialog h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.6rem;
+}
+
+/* Small, unobtrusive customize link */
+/* .customize-link {
+  font-size: 0.85rem;
+  color: #666;
+  text-decoration: none;
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.customize-link:hover {
+  color: #0066cc;
+  text-decoration: underline;
+} */
+
+.page {
+  position: relative;           /* ← critical: enables absolute positioning inside .page */
+}
+
+.customize-gear {
+  position: absolute;
+  top: 5mm;                    /* distance from top edge */
+  right: 70mm;                  /* distance from right edge */
+  z-index: 5;
+  color: #888;
+  opacity: 0.65;
+  transition: opacity 0.2s, transform 0.2s;
+  cursor: pointer;
+}
+
+.customize-gear:hover {
+  opacity: 1;
+  color: #0066cc;
+  transform: scale(1.2);
+}
+
+.customize-gear svg {
+  display: block;
+}
+
+/* Hide completely when printing */
+@media print {
+  .no-print,
+  .customize-gear {
+    display: none !important;
+  }
+}
