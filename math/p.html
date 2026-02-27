@@ -1,89 +1,195 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Papa's さんすうドリル</title>
-  <link href="style.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div id="pages-container"></div>
+  <div id="pages-container"></div>
 
-<script>
-// ==============================================
-// Settings
-// ==============================================
-const SETTINGS = {
-  SITE_TITLE: "Papa's さんすうドリル",
-  NUM_PAGES: 1,
-  NUM_ROWS: 5,
-  NUM_QUESTIONS_PER_ROW: 5,
-  Q1_MIN: 10,
-  Q1_MAX: 99,
-  Q2_MIN: 2,
-  Q2_MAX: 9,
-  OPERATOR_ADD: true,
-  OPERATOR_SUB: false,
-  OPERATOR_MUL: false,
-  OPERATOR_DIV: false,
-};
+  <dialog id="settings-dialog">
+    <h2>Worksheet Settings</h2>
+    <form id="settings-form">
 
-function getRandomNumber(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+      <div>
+        <label>Number of pages:</label>
+        <input type="number" id="num_pages" min="1" max="20" value="1" required>
+      </div>
 
-function getAvailableOperators() {
-  const ops = [];
-  if (SETTINGS.OPERATOR_ADD) ops.push('+');
-  if (SETTINGS.OPERATOR_SUB) ops.push('-');
-  if (SETTINGS.OPERATOR_MUL) ops.push('x');
-  if (SETTINGS.OPERATOR_DIV) ops.push('/');
-  return ops;
-}
+      <div>
+        <label>First number range (operand1):</label>
+        <input type="number" id="q1_min" min="0" max="999" value="10" required> –
+        <input type="number" id="q1_max" min="1" max="999" value="999" required>
+        <div class="error" id="q1-range-error">Min must be ≤ Max (max 999)</div>
+      </div>
 
-function generateQuestion() {
-  const ops = getAvailableOperators();
-  const operator = ops[Math.floor(Math.random() * ops.length)];
+      <div>
+        <label>Operations to include:</label>
+        <div style="margin-bottom: 0.8rem;">
+          <label>
+            <input type="checkbox" id="select-all-ops">
+            <strong>Select All</strong>
+          </label>
+        </div>
+        <div class="operator-group">
+          <label><input type="checkbox" id="op_add" checked> + Addition</label>
+          <label><input type="checkbox" id="op_sub"> – Subtraction</label>
+          <label><input type="checkbox" id="op_mul"> × Multiplication</label>
+          <label><input type="checkbox" id="op_div"> ÷ Division</label>
+        </div>
+        <div class="error" id="operators-error">Select at least one operation</div>
+      </div>
 
-  const operand1 = getRandomNumber(SETTINGS.Q1_MIN, SETTINGS.Q1_MAX);
-  const operand2 = getRandomNumber(SETTINGS.Q2_MIN, SETTINGS.Q2_MAX);
+      <div>
+        <label>
+          <input type="checkbox" id="show_answers">
+          Show answers (for answer key)
+        </label>
+      </div>
 
-  return {
-    operand1: operand1,
-    operator: operator,
-    operand2: operand2,
-    result: ''
-  };
-}
+      <div class="dialog-buttons">
+        <button type="button" id="cancel-btn">Cancel</button>
+        <button type="submit">Apply & Generate</button>
+      </div>
+    </form>
+  </dialog>
 
-function makeAllQuestionRows() {
-  const rows = [];
-  for (let i = 0; i < SETTINGS.NUM_ROWS; i++) {
-    const row = [];
-    for (let j = 0; j < SETTINGS.NUM_QUESTIONS_PER_ROW; j++) {
-      row.push(generateQuestion());
+  <script>
+    // ──────────────────────────────────────────────
+    // Settings
+    let SETTINGS = {
+      SITE_TITLE: "Papa's さんすうドリル",
+      NUM_PAGES: 1,
+      NUM_ROWS: 5,
+      NUM_QUESTIONS_PER_ROW: 5,
+      Q1_MIN: 10,
+      Q1_MAX: 999,
+      OPERATOR_ADD: true,
+      OPERATOR_SUB: false,
+      OPERATOR_MUL: false,
+      OPERATOR_DIV: false,
+      SHOW_ANSWERS: false,
+    };
+
+    // ──────────────────────────────────────────────
+    // Helpers
+    function getRandomNumber(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-    rows.push(row);
-  }
-  return rows;
-}
 
-// ==============================================
-// Build pages
-// ==============================================
-function buildPages() {
-  const container = document.getElementById('pages-container');
-  container.innerHTML = '';
+    function getAvailableOperators() {
+      const ops = [];
+      if (SETTINGS.OPERATOR_ADD) ops.push('+');
+      if (SETTINGS.OPERATOR_SUB) ops.push('-');
+      if (SETTINGS.OPERATOR_MUL) ops.push('×');
+      if (SETTINGS.OPERATOR_DIV) ops.push('÷');
+      return ops;
+    }
 
-  for (let p = 0; p < SETTINGS.NUM_PAGES; p++) {
-    const rowsData = makeAllQuestionRows();   // one page worth of data
+    function formatNumber(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
 
-    let pageHTML = `
+    // ──────────────────────────────────────────────
+    // Generate one question
+    function generateQuestion() {
+      const ops = getAvailableOperators();
+      if (ops.length === 0) {
+        return { operand1: "?", operator: "?", operand2: "?", result: "?" };
+      }
+
+      const operator = ops[Math.floor(Math.random() * ops.length)];
+
+      let operand1 = getRandomNumber(SETTINGS.Q1_MIN, SETTINGS.Q1_MAX);
+      let operand2;
+      let result = '';
+
+      if (operator === '÷') {
+        const maxDivisor = Math.floor(Math.sqrt(SETTINGS.Q1_MAX));
+        const minDivisor = 2;
+
+        let divisor;
+        let attempts = 0;
+        const maxAttempts = maxDivisor + 10;
+
+        do {
+          divisor = getRandomNumber(minDivisor, maxDivisor);
+          attempts++;
+
+          if (operand1 % divisor === 0) break;
+
+          if (attempts >= maxAttempts) {
+            divisor = getRandomNumber(minDivisor, maxDivisor);
+            const maxMultiple = Math.floor(SETTINGS.Q1_MAX / divisor);
+            const minMultiple = Math.max(1, Math.ceil(SETTINGS.Q1_MIN / divisor));
+            const multiple = getRandomNumber(minMultiple, maxMultiple);
+            operand1 = multiple * divisor;
+            break;
+          }
+        } while (true);
+
+        operand2 = divisor;
+      } else if (operator === '-') {
+        const q2MaxForThis = Math.max(1, operand1);
+        operand2 = getRandomNumber(1, q2MaxForThis);
+      } else {
+        operand2 = getRandomNumber(1, SETTINGS.Q1_MAX);
+      }
+
+      operand1 = Math.min(999, operand1);
+      operand2 = Math.min(999, operand2);
+
+      if (SETTINGS.SHOW_ANSWERS) {
+        let rawResult;
+        if (operator === '+') rawResult = operand1 + operand2;
+        else if (operator === '-') rawResult = operand1 - operand2;
+        else if (operator === '×') rawResult = operand1 * operand2;
+        else if (operator === '÷') rawResult = (operand2 !== 0) ? Math.floor(operand1 / operand2) : '?';
+
+        result = (rawResult === '?' || rawResult == null) ? '?' : formatNumber(rawResult);
+      }
+
+      return { operand1, operator, operand2, result };
+    }
+
+    function makeAllQuestionRows() {
+      const rows = [];
+      for (let i = 0; i < SETTINGS.NUM_ROWS; i++) {
+        const row = [];
+        for (let j = 0; j < SETTINGS.NUM_QUESTIONS_PER_ROW; j++) {
+          row.push(generateQuestion());
+        }
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    // ──────────────────────────────────────────────
+    // Build worksheet pages
+    function buildPages() {
+      const container = document.getElementById('pages-container');
+      container.innerHTML = '';
+
+      for (let p = 0; p < SETTINGS.NUM_PAGES; p++) {
+        const rowsData = makeAllQuestionRows();
+
+        let pageHTML = `
       <div class="page">
+        <a href="#" class="no-print customize-gear" title="Customize worksheet">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </a>
+
         <div class="header">
           <div class="title">
-            <a href="#">
+            <a href="p.html">
               <h1>${SETTINGS.SITE_TITLE}</h1>
             </a>
           </div>
@@ -92,17 +198,16 @@ function buildPages() {
               <div class="date">Date:</div>
               <div class="number">No.</div>
             </div>
-            <div class="name" colspan="2">Name:</div>
+            <div class="name">Name:</div>
           </div>
         </div>
         <table class="main">
     `;
 
-    // generate the question tables
-    rowsData.forEach(row => {
-      pageHTML += '<tr>';
-      row.forEach(q => {
-        pageHTML += `
+        rowsData.forEach(row => {
+          pageHTML += '<tr>';
+          row.forEach(q => {
+            pageHTML += `
           <td>
             <table class="question">
               <tr class="question-row">
@@ -120,18 +225,93 @@ function buildPages() {
             </table>
           </td>
         `;
+          });
+          pageHTML += '</tr>';
+        });
+
+        pageHTML += '</table></div>';
+        container.innerHTML += pageHTML;
+      }
+
+      // Attach click handlers to gear icons
+      document.querySelectorAll('.customize-gear').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          document.getElementById('num_pages').value = SETTINGS.NUM_PAGES;
+          document.getElementById('q1_min').value = SETTINGS.Q1_MIN;
+          document.getElementById('q1_max').value = SETTINGS.Q1_MAX;
+          document.getElementById('op_add').checked = SETTINGS.OPERATOR_ADD;
+          document.getElementById('op_sub').checked = SETTINGS.OPERATOR_SUB;
+          document.getElementById('op_mul').checked = SETTINGS.OPERATOR_MUL;
+          document.getElementById('op_div').checked = SETTINGS.OPERATOR_DIV;
+          document.getElementById('show_answers').checked = SETTINGS.SHOW_ANSWERS;
+          document.getElementById('select-all-ops').checked = false;
+          document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
+
+          document.getElementById('settings-dialog').showModal();
+        });
       });
-      pageHTML += '</tr>';
+    }
+
+    // ──────────────────────────────────────────────
+    // Dialog logic
+    document.getElementById('select-all-ops').addEventListener('change', function () {
+      const checked = this.checked;
+      document.getElementById('op_add').checked = checked;
+      document.getElementById('op_sub').checked = checked;
+      document.getElementById('op_mul').checked = checked;
+      document.getElementById('op_div').checked = checked;
     });
 
-    pageHTML += '</table></div>';
-    container.innerHTML += pageHTML;
-  }
-}
+    document.getElementById('cancel-btn').addEventListener('click', () => {
+      document.getElementById('settings-dialog').close();
+    });
 
-// Run when the page loads
-window.addEventListener('load', buildPages);
-</script>
+    document.getElementById('settings-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
+
+      let isValid = true;
+
+      const numPages = parseInt(document.getElementById('num_pages').value);
+      let q1Min = parseInt(document.getElementById('q1_min').value);
+      let q1Max = parseInt(document.getElementById('q1_max').value);
+
+      if (q1Min > q1Max) {
+        document.getElementById('q1-range-error').style.display = 'block';
+        isValid = false;
+      }
+
+      const anyOpChecked =
+        document.getElementById('op_add').checked ||
+        document.getElementById('op_sub').checked ||
+        document.getElementById('op_mul').checked ||
+        document.getElementById('op_div').checked;
+
+      if (!anyOpChecked) {
+        document.getElementById('operators-error').style.display = 'block';
+        isValid = false;
+      }
+
+      if (!isValid) return;
+
+      SETTINGS.NUM_PAGES = Math.max(1, numPages);
+      SETTINGS.Q1_MIN = Math.max(0, Math.min(999, q1Min));
+      SETTINGS.Q1_MAX = Math.max(SETTINGS.Q1_MIN, Math.min(999, q1Max));
+      SETTINGS.OPERATOR_ADD = document.getElementById('op_add').checked;
+      SETTINGS.OPERATOR_SUB = document.getElementById('op_sub').checked;
+      SETTINGS.OPERATOR_MUL = document.getElementById('op_mul').checked;
+      SETTINGS.OPERATOR_DIV = document.getElementById('op_div').checked;
+      SETTINGS.SHOW_ANSWERS = document.getElementById('show_answers').checked;
+
+      document.getElementById('settings-dialog').close();
+      buildPages();
+    });
+
+    window.addEventListener('load', buildPages);
+  </script>
 
 </body>
+
 </html>
