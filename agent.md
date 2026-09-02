@@ -90,14 +90,18 @@ Only use restaurants from the **main body list** below the Location and Category
 
 **Include only outlets that have an “Order Now” button** on that main listing. If there is no button, skip the outlet (walk-up only, coming soon, staff-only, members-only, kiosks without online order, etc.).
 
-When the official list was scraped (2026-08-18) there were 27 cards and **9** with Order Now. Those nine are on `hku/index.html`.
+When the official list was scraped (2026-09-02) there were 27 cards and **13** with Order Now. Those thirteen are on `hku/index.html`.
 
-### The nine outlets
+### The thirteen outlets
 
 Keep names, locations, local image filenames, and order URLs together. If you refresh from the official site, re-check every Order Now URL; they are third-party carts and change.
 
 | Name | Location (as shown) | Local image | Order URL |
 |---|---|---|---|
+| TamJai SamGor | G/F The Jockey Club Tower, Centennial Campus | `hku/img/tamjai-samgor.jpg` | `https://samgor.idimsum.com/byod/scan/store/102/S130/qr?orderType=TAKEAWAY` |
+| so330 | 2/F, Chong Yuet Ming Amenities Centre | `hku/img/so330.jpg` | `https://app.eats365pos.com/hk/en/so330_hku` |
+| Asian Gourmet | G/F, Run Run Shaw Tower, Centennial Campus | `hku/img/asian-gourmet.jpg` | `https://scan.aigens.com/scan?code=c3RvcmU9MjEyODI4Jm1vZGU9dGFrZWF3YXkmcGFnZT1ieW9k` |
+| alfafa bistro | LG/F, The Jockey Club Tower, Centennial Campus | `hku/img/alfafa-bistro.jpg` | `https://alfafabistro.self-order.app/alfafabistro/?c3RvcmVOdW1iZXI9MTA3JnRhYmxlTnVtYmVyPTk5OSZzYWxlc01vZGU9RkI=` |
 | CYM Canteen | 4/F, Chong Yuet Ming Cultural Centre | `hku/img/cym-canteen.jpg` | `https://now.order.place/#/store/102858/mode/prekiosk` |
 | Hong Kong Daily 香江冰室 | 4/F, Chong Yuet Ming Cultural Centre | `hku/img/hong-kong-daily.jpg` | `https://csd2.order.place/store/112841/mode/takeaway` |
 | Kiosk by The Sandwich Club | Run Run Shaw Podium | `hku/img/sandwich-club-kiosk.jpg` | Azure `odoui1` shop, `poiId=1714` |
