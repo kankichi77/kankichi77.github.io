@@ -1,0 +1,10 @@
+# Cloudflare Workers: static GitHub Pages files served as Worker assets.
+# Production (main) uses `npx wrangler deploy` → kankichi.net
+# PRs use `npx wrangler versions upload` → preview URL (not live).
+name = "kankichi-net"
+compatibility_date = "2026-09-02"
+preview_urls = true
+workers_dev = true
+
+[assets]
+directory = "./"
